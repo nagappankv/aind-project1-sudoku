@@ -3,11 +3,30 @@
 
 # Question 1 (Naked Twins)
 Q: How do we use constraint propagation to solve the naked twins problem?  
-A: *Student should provide answer here*
+A: Suduko can have identical twins, triplets, quads etc. <Br />
+   1.Finding all instances of naked twins from rows, colums and 3x# square units  <Br />
+   2.Eliminating the naked twins as possibilities for their peers
 
 # Question 2 (Diagonal Sudoku)
 Q: How do we use constraint propagation to solve the diagonal sudoku problem?  
-A: *Student should provide answer here*
+A: There are two diagonal arrays
+[A1, B2, C3, D4, E5, F6, G7, H8, I9]  and [A9, B8, C7, D6, E5, F4, G3, H2, I1]
+so these are added to the unitlist and passing to the same proceoss of eliminate and naked twins 
+recursively until the suduko is solved. 
+
+
+#   Solved Sudoko
+2 6 7 |9 4 5 |3 8 1<br />
+8 5 3 |7 1 6 |2 4 9<br />
+4 9 1 |8 2 3 |5 7 6<br />
+------+------+------<br />
+5 7 6 |4 3 8 |1 9 2 <br />
+3 8 4 |1 9 2 |6 5 7 <br />
+1 2 9 |6 5 7 |4 3 8 <br />
+------+------+------<br />
+6 4 2 |3 7 9 |8 1 5 <br />
+9 3 5 |2 8 1 |7 6 4 <br />
+7 1 8 |5 6 4 |9 2 3<br />
 
 ### Install
 
