@@ -1,4 +1,6 @@
+from collections import defaultdict
 assignments = []
+diagonals = []
 rows = 'ABCDEFGHI'
 cols = '123456789'
 
@@ -17,17 +19,17 @@ def assign_value(values, box, value):
         assignments.append(values.copy())
     return values
 
-def naked_twins(values):
-    """Eliminate values using the naked twins strategy.
-    Args:
-        values(dict): a dictionary of the form {'box_name': '123456789', ...}
-
-    Returns:
-        the values dictionary with the naked twins eliminated from peers.
-    """
-
-    # Find all instances of naked twins
-    # Eliminate the naked twins as possibilities for their peers
+def cross_diagonals(rows, cols):
+    cols_reverse = cols[::-1]
+    d_one = []
+    d_two = []
+    for (row, col) in zip(rows, cols):
+        d_one.append(row + col)
+    for (row_, col_) in zip(rows, cols_reverse):
+        d_two.append(row_ + col_)
+    diagonals.append(d_one)
+    diagonals.append(d_two)
+    return diagonals
 
 def cross(A, B):
     "Cross product of elements in A and elements in B."
@@ -38,9 +40,52 @@ boxes = cross(rows, cols)
 row_units = [cross(r, cols) for r in rows]
 column_units = [cross(rows, c) for c in cols]
 square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
-unitlist = row_units + column_units + square_units
+diagonal_units = cross_diagonals(rows, cols)
+
+unitlist = row_units + column_units + square_units + diagonal_units
 units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
 peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
+
+def naked_twins(values):
+    """Eliminate values using the naked twins strategy.
+    Args:
+        values(dict): a dictionary of the form {'box_name': '123456789', ...}
+
+    Returns:
+        the values dictionary with the naked twins eliminated from peers.
+    """
+
+    # Find all instances of naked twins
+    for unit in unitlist:
+        two_chars = {}
+        for box in unit:
+            # find boxes with two values:
+            if len(values[box]) == 2:
+                two_chars[box] = values[box]
+        # iterate over pairs and find twins
+        twins = defaultdict(list)
+
+        for key, value in two_chars.items():
+            twins[value].append(key)
+        naked_twins = {}
+        for key, value in twins.items():
+            if len(value) == 2:
+                naked_twins[key] = value
+        if len(naked_twins) == 0:
+            pass
+        if len(naked_twins) >= 2:
+            return False
+        # Eliminate the naked twins as possibilities for their peers
+        else:
+            # key is the twin value, the values are the box numbers
+            for key, value in naked_twins.items():
+                for box in unit:
+                    if values[box] != key:
+                        for element in key:
+                            # step three: remove elements
+                            if element in values[box]:
+                                values[box] = values[box].replace(element, '')
+    return values
 
 def grid_values(grid):
     """
@@ -109,8 +154,13 @@ def reduce_puzzle(values):
         solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
         # Use the Eliminate Strategy
         values = eliminate(values)
+
         # Use the Only Choice Strategy
-        values = only_choice(values)
+        # values = only_choice(values)
+
+        # Use the Naked twins Strategy
+        naked_twins(values)
+
         # Check how many boxes have a determined value, to compare
         solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
         # If no new values were added, stop the loop.
@@ -156,6 +206,7 @@ def solve(grid):
 if __name__ == '__main__':
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
     display(solve(diag_sudoku_grid))
+    solve(diag_sudoku_grid)
 
     try:
         from visualize import visualize_assignments
